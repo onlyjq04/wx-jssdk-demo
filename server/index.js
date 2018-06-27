@@ -62,6 +62,24 @@ const app = express()
 
 app.use(cors())
 
+app.get('/wechat/echo', (req, res) => {
+  const { signature, timestamp, nonce, echostr } = req.query
+
+  const array = [config.token, timestamp, nonce]
+  array.sort()
+
+  const tempStr = array.join('')
+  const resultCode = createHash('sha1')
+    .update(tempStr, 'utf8')
+    .digest('hex')
+
+  if (resultCode === signature) {
+    res.send(echostr)
+  } else {
+    res.send('mismatch')
+  }
+})
+
 app.get('/wechat/sign', (req, res) => {
   const { url } = req.query
   const nonceStr = getNonceStr()
