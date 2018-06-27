@@ -9,8 +9,8 @@ const cors = require('cors')
 const logger = require('./logger')
 
 const ACCESS_TOKEN_URL = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${
-  config.appID
-}&secret=${config.appsecret}`
+  config.appId
+}&secret=${config.appSecret}`
 
 const CACHE_EXPIRY = 1000 * 72 * 1000
 
@@ -51,7 +51,7 @@ function getNonceStr() {
   return randomBytes(16).toString('hex')
 }
 
-function buildSigniture(noncestr, timestamp, url, ticket) {
+function buildSignature(noncestr, timestamp, url, ticket) {
   const signature = createHash('sha1')
     .update(`jsapi_ticket=${ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${url}`)
     .digest('hex')
@@ -69,20 +69,20 @@ app.get('/wechat/sign', (req, res) => {
 
   getTicket()
     .then(ticket => {
-      const sig = buildSigniture(nonceStr, timestamp, url, ticket)
+      const sig = buildSignature(nonceStr, timestamp, url, ticket)
       res.json({
         status: 'success',
         sign: {
-          appId: config.appID,
+          appId: config.appId,
           nonceStr,
           timestamp,
-          signiture: sig
+          signature: sig
         }
       })
     })
     .catch(err => {
-      logger.error('Failed to get signiture: ', err)
-      res.status(500).send('Failed to get signiture')
+      logger.error('Failed to get signature: ', err)
+      res.status(500).send('Failed to get signature')
     })
 })
 
