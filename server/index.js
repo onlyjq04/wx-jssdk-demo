@@ -5,7 +5,6 @@ const config = require('../config')
 const cache = require('memory-cache')
 const Axios = require('axios')
 const co = require('co')
-const cors = require('cors')
 const logger = require('./logger')
 
 const ACCESS_TOKEN_URL = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${
@@ -55,12 +54,17 @@ function buildSignature(noncestr, timestamp, url, ticket) {
   const signature = createHash('sha1')
     .update(`jsapi_ticket=${ticket}&noncestr=${noncestr}&timestamp=${timestamp}&url=${url}`)
     .digest('hex')
+
+  logger.debug(JSON.stringify({
+    timestamp,
+    url,
+    ticket,
+    noncestr
+  }, null, 2))
   return signature
 }
 
 const app = express()
-
-app.use(cors())
 
 app.get('/wechat/echo', (req, res) => {
   const { signature, timestamp, nonce, echostr } = req.query
@@ -81,9 +85,11 @@ app.get('/wechat/echo', (req, res) => {
 })
 
 app.get('/wechat/sign', (req, res) => {
-  const { url } = req.query
+  let { url } = req.query
   const nonceStr = getNonceStr()
   const timestamp = Math.floor(Date.now() / 1000)
+
+  url = decodeURIComponent(url)
 
   getTicket()
     .then(ticket => {

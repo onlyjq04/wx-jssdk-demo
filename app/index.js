@@ -1,5 +1,10 @@
 window.onload = function() {
-  axios.get('http://127.0.0.1:8989/wechat/sign?url=www.example.com').then(resp => {
+  const currentUrl = encodeURIComponent(location.href.split('#')[0])
+  console.log(currentUrl)
+  axios({
+    methods: 'GET',
+    url: 'https://www.example.com/wechat/sign?url=' + currentUrl
+  }).then(resp => {
     const { nonceStr, timestamp, appId, signature } = resp.data.sign
     wx.config({
       debug: true,
